@@ -1,60 +1,76 @@
-const {src, dest, watch, parallel, series} = require('gulp');
+const { src, dest, watch, parallel, series } = require('gulp');
 const scss = require('gulp-sass')(require('sass'));
 const concat = require('gulp-concat');
 const uglify = require('gulp-uglify-es').default;
 const browserSync = require('browser-sync').create();
 const clean = require('gulp-clean');
 
-function styles(){
+// SCSS стили
+function styles() {
     return src('src/scss/style.scss')
-    .pipe(concat('style.min.css'))
-    .pipe(scss({outputStyle:'compressed'}))
-    .pipe(dest('src/css'))
-    .pipe(browserSync.stream());
+        .pipe(concat('style.min.css'))
+        .pipe(scss({ outputStyle: 'compressed' }))
+        .pipe(dest('src/css'))
+        .pipe(browserSync.stream());
 }
 
-function scripts(){
+// JS скрипты
+function scripts() {
     return src('src/js/main.js')
-    .pipe(concat('main.min.js'))
-    .pipe(uglify())
-    .pipe(dest('src/js'))
-    .pipe(browserSync.stream());
+        .pipe(concat('main.min.js'))
+        .pipe(uglify())
+        .pipe(dest('src/js'))
+        .pipe(browserSync.stream());
 }
 
+// Копирование шрифтов
 function fonts() {
     return src('src/fonts/**/*')
-    .pipe(dest('dist/fonts'));
+        .pipe(dest('dist/fonts'));
 }
 
-function watching(){
+// Копирование изображений
+function images() {
+    return src('src/images/**/*')
+        .pipe(dest('dist/images'));
+}
+
+// Следим за файлами
+function watching() {
     watch(['src/scss/style.scss'], styles);
     watch(['src/js/main.js'], scripts);
     watch(['src/fonts/**/*'], fonts);
+    watch(['src/images/**/*'], images); // Следим за изменениями изображений
     watch(['src/*.html']).on('change', browserSync.reload);
 }
 
-function browsersync(){
+// Инициализация BrowserSync
+function browsersync() {
     browserSync.init({
-        server:{
+        server: {
             baseDir: "src/"
         }
     });
 }
 
-function cleanDist(){
+// Очистка папки dist перед сборкой
+function cleanDist() {
     return src('dist')
-    .pipe(clean());
+        .pipe(clean());
 }
 
-function building(){
-    return src(['src/css/style.min.css','src/js/main.min.js','src/**/*.html'], {base:'src'})
-    .pipe(dest('dist'));
+// Построение проекта
+function building() {
+    return src(['src/css/style.min.css', 'src/js/main.min.js', 'src/**/*.html'], { base: 'src' })
+        .pipe(dest('dist'));
 }
 
+// Экспорт задач
 exports.styles = styles;
 exports.scripts = scripts;
 exports.fonts = fonts;
+exports.images = images; // Добавляем задачу для изображений
 exports.watching = watching;
 exports.browsersync = browsersync;
-exports.build = series(cleanDist, fonts, building);
+exports.build = series(cleanDist, fonts, images, building); // Добавляем в билд процесс
 exports.default = parallel(styles, scripts, browsersync, watching);

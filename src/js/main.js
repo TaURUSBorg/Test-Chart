@@ -23,7 +23,7 @@ const data = {
         hoverOffset: 10
     }]
 };
-const imageUrl = '../images/TK-Logo.svg'; 
+const imageUrl = '../images/TK-Logo.svg';
 const config = {
     type: 'doughnut',
     data: data,
